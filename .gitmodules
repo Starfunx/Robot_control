@@ -1,0 +1,9 @@
+[submodule "src/external/serial_driver"]
+	path = src/external/serial_driver
+	url = https://github.com/S6ril/serial_driver.git
+[submodule "src/external/sensor_board"]
+	path = src/external/sensor_board
+	url = https://github.com/S6ril/sensor_board.git
+[submodule "src/external/API_interface"]
+	path = src/external/API_interface
+	url = https://github.com/S6ril/API-interface-python.git
