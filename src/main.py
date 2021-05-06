@@ -1,4 +1,5 @@
-from external.API_interface import Robot, Pose2D, Wheel
+from external.API_interface import Robot
+from external.API_interface.TLF_API.component.Class_Pose2D import Pose2D
 
 from robot_package.data_robot_creator import data_robot_creator
 
@@ -7,15 +8,16 @@ from robot_package.data_robot_creator import data_robot_creator
 import numpy as np
 
 class RobotControl():
-    def __init__(self, nom_fichier):
+    def __init__(self, nom_fichier, robot_port, robot_bauderate):
         # creation des capteurs virtuels avec le yaml --> permet de convertir distacne en position
         
         _, self.dist_sensor = data_robot_creator(nom_fichier) # On ne récupère pas les points du robot
-
+        self.robot = Robot(robot_port, robot_bauderate) # Initialisation de la communication vers le robot
+        self.pose = Pose2D()
         pass
 
 
-    def update_speed():
+    def update_speed(self):
         # lecture
         # traitement
         # ecriture
@@ -24,6 +26,7 @@ class RobotControl():
         #######################
         # update vitesse vitesse angulaire en fonction des obstacles
         # Recupére position --> driver robot
+        self.pose = self.robot.get_pose()
         # recup obstacle --> driver carte obstacle
         # Dist_sensir(obstacle) -> repère robot
         
@@ -54,4 +57,7 @@ class RobotControl():
 
 if __name__ == "__main__":
     nom_fichier = './config/robot_config.yaml'
-    robotcontrol = RobotControl(nom_fichier)
+    robot_port = "COM8"
+    robot_baurate = 115200
+    robotcontrol = RobotControl(nom_fichier, robot_port, robot_baurate)
+
