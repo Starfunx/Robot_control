@@ -1,4 +1,4 @@
-from external.API_interface_python.TLF_API.Class_Robot import Robot
+from external.API_interface import Robot, Pose2D, Wheel
 
 from robot_package.data_robot_creator import data_robot_creator
 
@@ -53,5 +53,5 @@ class RobotControl():
 
 
 if __name__ == "__main__":
-    nom_fichier = './src/config/robot_config.yaml'
+    nom_fichier = './config/robot_config.yaml'
     robotcontrol = RobotControl(nom_fichier)
