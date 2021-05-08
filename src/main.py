@@ -42,8 +42,8 @@ class RobotControl():
         angle_goal = self.goal.theta - self.robotPose.theta
 
         # Constantes
-        krho = 2
-        kalpha = 8
+        krho = 0.2
+        kalpha = 2
 
         dt = (time.time()- self.time)
         linear_speed = krho* dist_robot2goal / dt
@@ -94,9 +94,9 @@ class RobotControl():
     def goal_reached(self):
         # critère dans un yaml
         distance = self.distance_robot2goal(self.goal)
-        print(distance)
+        # print(distance)
 
-        if distance < 10:
+        if distance < 20:
             return 1
         
         else:
