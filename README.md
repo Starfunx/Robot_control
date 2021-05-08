@@ -9,16 +9,11 @@ Pour l'installer, entrer les commandes suivantes :
 
 ```bash
 # Téléchargement du repo
- git clone --recursive https://github.com/S6ril/Robot_control.git
+git clone --recursive https://github.com/S6ril/Robot_control.git
+cd ./Robot_control
 
-# Petit problème avec une bibliothèque qui apparait 3x,
-# On supprime une occurence dans sensor_board
-cd .\Robot_control\src\external\sensor_board\
-git submodule deinit -- .\external\serial_driver\
-
-# On supprime une occurence dans TLF_API
-cd .\Robot_control\src\external\TLF_API\
-git submodule deinit -- .\external\serial_driver\
+# Téléchargement des sous modules
+git submodule update --init
 ```
 
 
