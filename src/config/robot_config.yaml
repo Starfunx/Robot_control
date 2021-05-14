@@ -1,28 +1,28 @@
 point_robot:  # Création des différents points pour former le robot
   p1:
-    x: -150
-    y: 50
+    x: -135
+    y: 92
   p2:
-    x: 150
-    y: 50
+    x: 135
+    y: 92
   p3:
-    x: 150
-    y: -50
+    x: 135
+    y: -28
   p4:
-    x: 20
-    y: -50
+    x: 10
+    y: -28
   p5:
-    x: 20
-    y: -150
+    x: 10
+    y: -92
   p6:
-    x: -20
-    y: -150
+    x: -10
+    y: -92
   p7: 
-    x: -20
-    y: -50
+    x: -10
+    y: -28
   p8:
-    x: -150
-    y: -50
+    x: -135
+    y: -28
 
 # Défiition des capteurs
 capteurs:
