@@ -13,6 +13,8 @@ On retrouve :
 
 <p align="center">
 Exemple d'affichage des zônes avec deux capteurs
+</p>
+<p align="center">
 <img width="50%" src="../../images/data_plot.png" alt="Affichage des données du robot">
 </p>
 
