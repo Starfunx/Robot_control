@@ -2,24 +2,37 @@ from external.API_interface import Robot
 from external.API_interface.TLF_API.component.Class_Pose2D import Pose2D
 
 from robot_package.data_robot_creator import data_robot_creator
+from external.sensor_board import CarteDetecteurObstacle
 
 
 import time
 import numpy as np
+from shapely.geometry import MultiPoint, Polygon
+
 
 class RobotControl():
-    def __init__(self, nom_fichier, robot_port, robot_bauderate):
+    def __init__(self, nom_fichier, robot_port, robot_bauderate, carte_obstacle_port, carte_obstacle_bauderate):
         # creation des capteurs virtuels avec le yaml --> permet de convertir distacne en position
-        self.robot = Robot(robot_port, robot_bauderate)
-        _, self.dist_sensor = data_robot_creator(nom_fichier) # On ne récupère pas les points du robot
+        _, self.dist_sensor, self.point_area_obstacle = data_robot_creator(nom_fichier) # On ne récupère pas les points du robot
         
+        # création des zones de detections d'obstacle
+        self.aire_avant_gauche = Polygon(self.point_area_obstacle[0])
+        self.aire_avant_droite = Polygon(self.point_area_obstacle[1])
+
+        # Création des cartes de communications
+        self.robot = Robot(robot_port, robot_bauderate)
+        self.carteobstacle = CarteDetecteurObstacle(carte_obstacle_port, carte_obstacle_bauderate)
+        
+
+        # Positions utiles pour le robot
         self.goal = None
         self.robotPose = self.robot.get_pose()
         
-        self.vitesse_angulaire = []
-        self.vitesse_lineaire = []
-        self.vitesse_roue_gauche = []
-        self.vitesse_roue_droite = []
+        # Sauvegarde de données pour les tracer
+        self.consigne_vitesse_angulaire = []
+        self.consigne_vitesse_lineaire = []
+        self.mesure_vitesse_roue_gauche = []
+        self.mesure_vitesse_roue_droite = []
 
         self.time = time.time()
 
@@ -30,7 +43,6 @@ class RobotControl():
         # ecriture
         #######################
         # Recupe données
-        #######################
         # update vitesse vitesse angulaire en fonction des obstacles
         # Recupére position --> driver robot
         self.robotPose = self.robot.get_pose()
@@ -45,34 +57,62 @@ class RobotControl():
         krho = 0.2
         kalpha = 2
 
-        dt = (time.time()- self.time)
-        linear_speed = krho* dist_robot2goal / dt
-        angular_speed = kalpha* angle_robot2goal / dt
-        self.robot.set_speed(linear_speed, angular_speed)
         
-        self.time = time.time()
-        
-        self.vitesse_angulaire.append(angular_speed)
-        self.vitesse_lineaire.append(linear_speed)
-
-        RL = self.robot.get_left_wheel_data()
-        self.vitesse_roue_gauche.append(RL.measure)
-        RR = self.robot.get_right_wheel_data()
-        self.vitesse_roue_droite.append(RR.measure)
         # recup obstacle --> driver carte obstacle
-        # Dist_sensir(obstacle) -> repère robot
+        # Transformation dans le repère du robot en même temps
+        liste_obstacle = self.carteobstacle.get_distance('A')
+        multipoint_obstacle = []
+        for sensor, distance in zip(self.dist_sensor, liste_obstacle):
+            sensor.set_distance(distance)
+            point_repère_robot = MultiPoint(sensor.get_obstacle_pose())
+            if self.aire_avant_gauche.contains(point_repère_robot):
+                print("Point à l'avant gauche")
+
+            if self.aire_avant_droite.contains(point_repère_robot):
+                print("Point à l'avant droite")
+            
+            multipoint_obstacle.append(point_repère_robot)
         
-        ##  # gestionnaire capteur virtuel
-        ##  # robot transforme point dans le repère du robot (optionnel à garder en t^te)
- 
+        # Dist_sensir(obstacle) -> repère robot
+
         #
         ############################
         # Stratégie en fonction des données
-        #############################
         # Calcul vitesse, vitesse angulaire pour aller au point B
+        dt = (time.time() - self.time)
+        consign_linear_speed = krho * dist_robot2goal / dt
+        consign_angular_speed = kalpha * angle_robot2goal / dt
 
+
+        # on définit un polygone et on vérifie si les obstacles sont dans cet espcae
+        # --> vitesse lineaire/angulaire à 0 --> strategie arret, plus tard strategie d'évitement
+        # 
+        # Si la vitesse lineaire est positif : poly test devant le robot
+        # 
+        # Si la vitesse lineaire est negative, poly derrère le robot
+        # 
+        # FAIRE SCH2MA
+        #  
+
+
+        ############################
         # update la vitesse avec le driver
-        pass
+
+        self.robot.set_speed(consign_linear_speed, consign_angular_speed)
+
+        self.time = time.time()
+
+        ############################
+        ## Affichage - sauvegarde des données
+        self.consigne_vitesse_angulaire.append(consign_angular_speed)
+        self.consigne_vitesse_lineaire.append(consign_linear_speed)
+
+        left_wheel = self.robot.get_left_wheel_data()
+        right_wheel = self.robot.get_right_wheel_data()
+        self.mesure_vitesse_roue_gauche.append(left_wheel.measure)
+        self.mesure_vitesse_roue_droite.append(right_wheel.measure)
+    # END FUNCTION UPDATE SPEED
+
 
     def set_goal(self, pose : Pose2D):
         self.goal = pose
@@ -129,10 +169,10 @@ if __name__ == "__main__":
         print("stop")
         pass
 
-    np.save("vitesse_angular", robotcontrol.vitesse_angulaire)
-    np.save("vitesse_linear", robotcontrol.vitesse_lineaire)
-    np.save("RL", robotcontrol.vitesse_roue_gauche)
-    np.save("RR", robotcontrol.vitesse_roue_droite)
+    np.save("vitesse_angular", robotcontrol.consigne_vitesse_angulaire)
+    np.save("vitesse_linear", robotcontrol.consigne_vitesse_lineaire)
+    np.save("left_wheel", robotcontrol.mesure_vitesse_roue_gauche)
+    np.save("right_wheel", robotcontrol.mesure_vitesse_roue_droite)
 
     robotcontrol.robot.set_speed(0, 0)
     robotcontrol.robot.disable_motors()
