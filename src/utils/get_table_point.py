@@ -34,7 +34,7 @@ def get_table_point(nom_fichier):
 
 
 if __name__ == "__main__":
-    nom_fichier = './src/table_config.yaml'
+    nom_fichier = './src/config/table_config.yaml'
     table = get_table_point(nom_fichier)
 
     print(table)
