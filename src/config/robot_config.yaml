@@ -60,7 +60,7 @@ area_detection_obstacle:
   area_avant_gauche:
     p1:
       x: -400
-      y: 500
+      y: 400
     p2: 
       x: -300
       y: 0
@@ -69,12 +69,12 @@ area_detection_obstacle:
       y: 0
     p4: 
       x: -20
-      y: 500
+      y: 400
 
   area_avant_droite:
     p1:
       x: 400
-      y: 500
+      y: 400
     p2: 
       x: 300
       y: 0
@@ -83,5 +83,5 @@ area_detection_obstacle:
       y: 0
     p4: 
       x: 20
-      y: 500
+      y: 400
 

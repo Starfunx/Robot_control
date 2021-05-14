@@ -1,3 +1,4 @@
+from matplotlib.collections import PolyCollection
 if __name__ == "__main__":
     # Pour executer le code en local et avoir les bon import
     import sys
@@ -5,7 +6,7 @@ if __name__ == "__main__":
     sys.path.append(os.getcwd() + "\\src")
     from robot_package.data_robot_creator import data_robot_creator
 
-
+from matplotlib.patches import Polygon
 import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.angle_helper as angle_helper
@@ -80,12 +81,27 @@ def curvelinear_plot(rayon_max = 1000):
 
 
 if __name__ == "__main__":
-
-    fig, ax1 = curvelinear_plot(500)
+    import random as random
+    fig, ax = curvelinear_plot(500)
     nom_fichier = './src/config/robot_config.yaml'
-    point_robot, dist_sensors = data_robot_creator(nom_fichier)
+    point_robot, dist_sensors, area_obstacle = data_robot_creator(nom_fichier)
 
-    ax1.plot(point_robot[0], point_robot[1])
+    
+    ax.plot(point_robot[0], point_robot[1])
+    
+    for sensor in dist_sensors:
+        #Affichage capteur
+        sensor_pose = sensor.get_sensor_pose()
+        ax.plot([sensor_pose[0]], sensor_pose[1], 'ko')
+        ax.plot([sensor_pose[0], sensor_pose[0] + 50*np.sin(-sensor_pose[2])], [sensor_pose[1], sensor_pose[1] + 50*np.cos(-sensor_pose[2])], 'k')
+    # ax.plot(dist_sensors[0], dist_sensors[1], 'o')
+
+    color = ["b", "r", "g", "m", "y"]
+    for area, c in zip(area_obstacle, color):
+        poly = plt.Polygon(area, facecolor=c,
+                           edgecolor=c, alpha=0.25, zorder=2)
+        ax.add_patch(poly)
+    
 
 
     plt.show()
