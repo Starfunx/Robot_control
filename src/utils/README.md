@@ -13,7 +13,7 @@ On retrouve :
 
 <p align="center">
 Exemple d'affichage des zônes avec deux capteurs
-<img width="100%" src="../../images/data_plot.png" alt="Affichage des données du robot">
+<img width="50%" src="../../images/data_plot.png" alt="Affichage des données du robot">
 </p>
 
 ## Yaml Utils
