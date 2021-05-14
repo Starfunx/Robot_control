@@ -1,3 +1,4 @@
+from numpy.core.numeric import False_
 from external.API_interface import Robot
 from external.API_interface.TLF_API.component.Class_Pose2D import Pose2D
 
@@ -24,8 +25,7 @@ class RobotControl():
         self.carteobstacle = CarteDetecteurObstacle(carte_obstacle_port, carte_obstacle_bauderate)
         
         # Flag obstacle
-        self.flag_obstacle_gauche = 0
-        self.flag_obstacle_droite = 0
+        self.flag_evitement_obstacle = False
 
         self.evitement = Pose2D(500, 300)
 
@@ -59,6 +59,8 @@ class RobotControl():
         # Constantes
         krho = 0.2
         kalpha = 2
+        flag_obstacle_droite = 0
+        flag_obstacle_gauche = 0
 
         
         # recup obstacle --> driver carte obstacle
@@ -72,38 +74,46 @@ class RobotControl():
             
             if self.aire_avant_gauche.contains(point_repère_robot):
                 print("Point à l'avant gauche")
-                self.flag_obstacle_gauche += 1
-                break
+                flag_obstacle_gauche = True
+
 
             if self.aire_avant_droite.contains(point_repère_robot):
                 print("Point à l'avant droite")
-                self.flag_obstacle_droite += 1
+                flag_obstacle_droite = True
+
+            if (flag_obstacle_gauche and flag_obstacle_droite):
+                # Emergency
                 break
 
-            
-        
-        if (self.flag_obstacle_droite == 1):
-            print("change goal vers la gauche")
-            self.goal_save.append(self.goal)
-            position = self.robotPose
-            self.goal = Pose2D(position.x + self.evitement.x,
-                               position.y + self.evitement.y, 0)
+        if (flag_obstacle_gauche and flag_obstacle_droite):
+            print("------- LES DEUX CAPTEURS ----------")
+            self.flag_evitement_obstacle = True
+            # Calculs
+            dist_robot2goal = 0
+            angle_robot2goal = 0
+            angle_goal = 0
 
-        elif (self.flag_obstacle_gauche == 1):
-            print("change goal vers la droite")
-            self.goal_save.append(self.goal)
-            position = self.robotPose
-            self.goal = Pose2D(position.x + self.evitement.x,
-                               position.y - self.evitement.y, 0)
+        else:
+            if (flag_obstacle_droite and not(self.flag_evitement_obstacle)):
+                self.flag_evitement_obstacle = True
+                print("change goal vers la gauche")
+                self.goal_save.append(self.goal)
+                position = self.robotPose
+                self.goal = Pose2D(position.x + self.evitement.x,
+                                position.y + self.evitement.y, 0)
 
-        elif (self.flag_obstacle_droite and self.flag_obstacle_gauche):
-            position = self.robotPose
-            self.goal = Pose2D(position.x, position.y, 0)
-    
-        # Calculs
-        dist_robot2goal = self.distance_robot2goal(self.goal)
-        angle_robot2goal = self.angle_robot2goal(self.goal)
-        angle_goal = self.goal.theta - self.robotPose.theta
+            elif (flag_obstacle_gauche and not(self.flag_evitement_obstacle)):
+                self.flag_evitement_obstacle = True
+                print("change goal vers la droite")
+                self.goal_save.append(self.goal)
+                position = self.robotPose
+                self.goal = Pose2D(position.x + self.evitement.x,
+                                position.y - self.evitement.y, 0)
+
+            # Calculs
+            dist_robot2goal = self.distance_robot2goal(self.goal)
+            angle_robot2goal = self.angle_robot2goal(self.goal)
+            angle_goal = self.goal.theta - self.robotPose.theta
         
         # Dist_sensir(obstacle) -> repère robot
 
@@ -167,21 +177,19 @@ class RobotControl():
     def goal_reached(self):
         # critère dans un yaml
         distance = self.distance_robot2goal(self.goal)
+        nb_goal = len(self.goal_save)
         # print(distance)
 
-        if distance < 50:
+        if (nb_goal > 0) and (distance < 100):
             print(distance)
             print("goal", self.goal.x, "; ", self.goal.y)
             # reset flag
-            self.flag_obstacle_droite = 0
-            self.flag_obstacle_gauche = 0
-            if len(self.goal_save) > 0:
-                self.goal = self.goal_save.pop()
-                self.update_speed()
-                return 0
-            
-            else :
-                return 1
+            self.flag_evitement_obstacle = False
+            self.goal = self.goal_save.pop()
+            return 0
+
+        elif (distance < 50):
+            return 1
         
         else:
             return 0
