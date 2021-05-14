@@ -82,7 +82,7 @@ def curvelinear_plot(rayon_max = 1000):
 
 if __name__ == "__main__":
     import random as random
-    fig, ax = curvelinear_plot(800)
+    fig, ax = curvelinear_plot(500)
     nom_fichier = './src/config/robot_config.yaml'
     point_robot, dist_sensors, area_obstacle = data_robot_creator(nom_fichier)
 
