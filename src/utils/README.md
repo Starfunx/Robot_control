@@ -12,7 +12,8 @@ On retrouve :
 
 
 <p align="center">
-<img width="100%" src="/images/data_plot.png" alt="Affichage des données du robot">
+Exemple d'affichage des zônes avec deux capteurs
+<img width="100%" src="../../images/data_plot.png" alt="Affichage des données du robot">
 </p>
 
 ## Yaml Utils
@@ -30,6 +31,9 @@ print(dictionnaire)
 ```
 Ce script retourne alors un dictionnaire avec toutes les valeurs. On les utilise ensuite dans le script `data_robot_creator`.
 
+## Get table point
+
+Ce script permet d'extraire les points de la table du fichier de configuration `table_config.yaml` et de les mettre dans une liste python facilement affichage avec Matplotlib.
 
 ## Auteurs
 
