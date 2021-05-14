@@ -1,70 +1,70 @@
 point_robot:  # Création des différents points pour former le robot
   p1:
     x: -135
-    y: 92
+    y: 110
   p2:
     x: 135
-    y: 92
+    y: 110
   p3:
     x: 135
-    y: -28
+    y: -10
   p4:
-    x: 10
-    y: -28
+    x: 30
+    y: -10
   p5:
-    x: 10
-    y: -92
+    x: 30
+    y: -110
   p6:
-    x: -10
-    y: -92
+    x: -30
+    y: -110
   p7: 
-    x: -10
-    y: -28
+    x: -30
+    y: -10
   p8:
     x: -135
-    y: -28
+    y: -10
 
 # Défiition des capteurs
 capteurs:
   ultrason1:
     type: ultrason
-    x: 135 # position suivant x en mm
-    y: 92 # position suivant y en mm
+    x: 120 # position suivant x en mm
+    y: 110 # position suivant y en mm
     theta: 0 #angle en degrès d'inclinaison du capteur par rapport au sens de marche du robot
 
   ultrason2:
     type: ultrason
-    x: -135 # position suivant x en mm
-    y: 92 # position suivant y en mm
+    x: -120 # position suivant x en mm
+    y: 110 # position suivant y en mm
     theta: 0 #angle en degrès
 
 
 area_detection_obstacle:
   area_avant_gauche:
     p1:
-      x: -400
-      y: 400
+      x: -135
+      y: 110
     p2: 
-      x: -300
-      y: 0
+      x: 0
+      y: 110
     p3:
-      x: -20
-      y: 0
+      x: 0
+      y: 350
     p4: 
-      x: -20
-      y: 400
+      x: -300
+      y: 350
 
   area_avant_droite:
     p1:
-      x: 400
-      y: 400
+      x: 135
+      y: 110
     p2: 
-      x: 300
-      y: 0
+      x: 0
+      y: 110
     p3:
-      x: 20
-      y: 0
+      x: 0
+      y: 350
     p4: 
-      x: 20
-      y: 400
+      x: 300
+      y: 350
 
