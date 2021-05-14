@@ -84,14 +84,12 @@ def area_obstacle_creator(dict_area):
     point_area = []
 
     for area in dict_area:
-        area_pointX = []
-        area_pointY = []
+        area_point = []
         dict_point = dict_area.get(area)
         for point in dict_point:
             data = dict_point.get(point)
-            area_pointX.append(data['x'])
-            area_pointY.append(data['y'])
-        point_area.append([area_pointX, area_pointY])
+            area_point.append([data['x'], data['y']])
+        point_area.append(area_point)
     
     return point_area
 
