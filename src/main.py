@@ -24,10 +24,10 @@ class RobotControl():
         self.robot = Robot(robot_port, robot_bauderate)
         self.carteobstacle = CarteDetecteurObstacle(carte_obstacle_port, carte_obstacle_bauderate)
         
-        # Flag obstacle
-        self.flag_evitement_obstacle = False
+        # COnsigne
+        self.consign_linear_speed = 0
+        self.consign_angular_speed = 0
 
-        self.evitement = Pose2D(500, 300)
 
         # Positions utiles pour le robot
         self.goal = None
@@ -87,63 +87,55 @@ class RobotControl():
 
         if (flag_obstacle_gauche and flag_obstacle_droite):
             print("------- LES DEUX CAPTEURS ----------")
-            self.flag_evitement_obstacle = True
             # Calculs
-            dist_robot2goal = 0
-            angle_robot2goal = 0
-            angle_goal = 0
+            self.consign_linear_speed = 0
+            self.consign_angular_speed = 0
+
+        elif (flag_obstacle_gauche or flag_obstacle_droite):
+
+            if (flag_obstacle_droite):
+                print("change goal vers la gauche")
+                self.consign_linear_speed = 0
+                self.consign_angular_speed += 0.5
+
+            elif (flag_obstacle_gauche):
+                print("change goal vers la droite")
+                self.consign_linear_speed = 0
+                self.consign_angular_speed -= 0.5
 
         else:
-            if (flag_obstacle_droite and not(self.flag_evitement_obstacle)):
-                self.flag_evitement_obstacle = True
-                print("change goal vers la gauche")
-                self.goal_save.append(self.goal)
-                position = self.robotPose
-                self.goal = Pose2D(position.x + self.evitement.x,
-                                position.y + self.evitement.y, 0)
-
-            elif (flag_obstacle_gauche and not(self.flag_evitement_obstacle)):
-                self.flag_evitement_obstacle = True
-                print("change goal vers la droite")
-                self.goal_save.append(self.goal)
-                position = self.robotPose
-                self.goal = Pose2D(position.x + self.evitement.x,
-                                position.y - self.evitement.y, 0)
 
             # Calculs
             dist_robot2goal = self.distance_robot2goal(self.goal)
             angle_robot2goal = self.angle_robot2goal(self.goal)
             angle_goal = self.goal.theta - self.robotPose.theta
+    
+            # Dist_sensir(obstacle) -> repère robot
+            ############################
+            # Stratégie en fonction des données
+            # Calcul vitesse, vitesse angulaire pour aller au point B
+            dt = (time.time() - self.time)
+            
+            self.consign_linear_speed = krho * dist_robot2goal / dt
+            self.consign_angular_speed = kalpha * angle_robot2goal / dt
         
-        # Dist_sensir(obstacle) -> repère robot
-
-        #
-        ############################
-        # Stratégie en fonction des données
-        # Calcul vitesse, vitesse angulaire pour aller au point B
-        dt = (time.time() - self.time)
         
-        consign_linear_speed = krho * dist_robot2goal / dt
-        consign_angular_speed = kalpha * angle_robot2goal / dt
-
-
-        # on définit un polygone et on vérifie si les obstacles sont dans cet espcae
-        # --> vitesse lineaire/angulaire à 0 --> strategie arret, plus tard strategie d'évitement
-        # 
-        # Si la vitesse lineaire est positif : poly test devant le robot
-        # 
-        # Si la vitesse lineaire est negative, poly derrère le robot
-        # 
-        # FAIRE SCH2MA
-        #  
-
-
         ############################
         # update la vitesse avec le driver
 
-        self.robot.set_speed(consign_linear_speed, consign_angular_speed)
-
+        # on définit un polygone et on vérifie si les obstacles sont dans cet espcae
+        # --> vitesse lineaire/angulaire à 0 --> strategie arret, plus tard strategie d'évitement
+        #
+        # Si la vitesse lineaire est positif : poly test devant le robot
+        #
+        # Si la vitesse lineaire est negative, poly derrère le robot
+        #
+        # FAIRE SCH2MA
+        #
+        
+        self.robot.set_speed(self.consign_linear_speed, self.consign_angular_speed)
         self.time = time.time()
+
 
         # ############################
         # ## Affichage - sauvegarde des données
@@ -183,8 +175,7 @@ class RobotControl():
         if (nb_goal > 0) and (distance < 100):
             print(distance)
             print("goal", self.goal.x, "; ", self.goal.y)
-            # reset flag
-            self.flag_evitement_obstacle = False
+            
             self.goal = self.goal_save.pop()
             return 0
 
