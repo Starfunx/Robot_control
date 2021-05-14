@@ -55,3 +55,33 @@ capteurs:
     x: 160 # position suivant x en mm
     y: 0 # position suivant y en mm
     theta: -90 #angle en degrès
+
+area_detection_obstacle:
+  area_avant_gauche:
+    p1:
+      x: -400
+      y: 500
+    p2: 
+      x: -300
+      y: 0
+    p3:
+      x: -20
+      y: 0
+    p4: 
+      x: -20
+      y: 500
+
+  area_avant_droite:
+    p1:
+      x: 400
+      y: 500
+    p2: 
+      x: 300
+      y: 0
+    p3:
+      x: 20
+      y: 0
+    p4: 
+      x: 20
+      y: 500
+

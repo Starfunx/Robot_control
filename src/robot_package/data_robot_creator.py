@@ -21,8 +21,9 @@ def data_robot_creator(nom_fichier):
 
     dist_sensors = capteur_creator(dict_data.get('capteurs'))
     point_robot = robot_point_creator(dict_data.get('point_robot'))
+    point_area_obstacle = area_obstacle_creator(dict_data.get('area_detection_obstacle'))
 
-    return point_robot, dist_sensors
+    return point_robot, dist_sensors, point_area_obstacle
 
 
 
@@ -71,11 +72,35 @@ def robot_point_creator(dict_point):
 
     return [robot_pointX, robot_pointY]
 
+def area_obstacle_creator(dict_area):
+    """FOnction qui permet de convertir le dictionnaire de points représentant les aires de detection en liste python de points 
+
+    Args:
+        dict_area (dict): dictionnaire de configuration des zones de detections d'obstacle
+
+    Returns:
+        liste: liste des points des différentes aires
+    """
+    point_area = []
+
+    for area in dict_area:
+        area_pointX = []
+        area_pointY = []
+        dict_point = dict_area.get(area)
+        for point in dict_point:
+            data = dict_point.get(point)
+            area_pointX.append(data['x'])
+            area_pointY.append(data['y'])
+        point_area.append([area_pointX, area_pointY])
+    
+    return point_area
+
 
 
 if __name__ == "__main__":     
     nom_fichier = './src/config/robot_config.yaml'
-    point_robot, dist_sensor = data_robot_creator(nom_fichier)
+    point_robot, dist_sensor, point_area_obstacle = data_robot_creator(nom_fichier)
 
-    print(point_robot)
+    print("\n------ Main -----")
+    print(point_area_obstacle)
 
