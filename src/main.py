@@ -67,45 +67,52 @@ class RobotControl():
         # Transformation dans le repère du robot en même temps
         liste_obstacle = self.carteobstacle.get_distance('A')
         
+        # Vérification des distance des capteurs
         for sensor, distance in zip(self.dist_sensor, liste_obstacle):
+            # Liaison des distances réelles aux capteurs virtuels --> Connaitre position de l'obstacle
             sensor.set_dist(distance, 0)
-
+            # Projection dans le repère du robot
             point_repère_robot = MultiPoint(np.transpose(sensor.get_obstacle_pose()))
             
+            ### Vérification de la distance en fonctions des zones (droite ou gauche)
             if self.aire_avant_gauche.contains(point_repère_robot):
                 print("Point à l'avant gauche")
                 flag_obstacle_gauche = True
-
 
             if self.aire_avant_droite.contains(point_repère_robot):
                 print("Point à l'avant droite")
                 flag_obstacle_droite = True
 
+            ## Si on a un obstalce dans les 2 zones, on passe directement à la suite 
             if (flag_obstacle_gauche and flag_obstacle_droite):
                 # Emergency
                 break
 
+        ##################################
+        ## Stratégie d'évitement vers la gauche ou la droite en focntion de l'obstacle
+
+        # Gestion de la vitesse pour un obstacle dans les 2 zones --> Arret immédiat
         if (flag_obstacle_gauche and flag_obstacle_droite):
             print("------- LES DEUX CAPTEURS ----------")
             # Calculs
             self.consign_linear_speed = 0
             self.consign_angular_speed = 0
 
+        # Gestion de 1 obstacle dans 1 seule zone (avance)
         elif (flag_obstacle_gauche or flag_obstacle_droite):
+            self.consign_linear_speed = 0
 
             if (flag_obstacle_droite):
                 print("change goal vers la gauche")
-                self.consign_linear_speed = 0
-                self.consign_angular_speed += 0.5
+                self.consign_angular_speed += 0.1
 
             elif (flag_obstacle_gauche):
                 print("change goal vers la droite")
-                self.consign_linear_speed = 0
-                self.consign_angular_speed -= 0.5
+                self.consign_angular_speed -= 0.1
 
+        # Cas où il n'y a aucun obstacle, on calcule l'objectif
         else:
-
-            # Calculs
+            # Calculs si il n'y a aucun obstacle
             dist_robot2goal = self.distance_robot2goal(self.goal)
             angle_robot2goal = self.angle_robot2goal(self.goal)
             angle_goal = self.goal.theta - self.robotPose.theta
