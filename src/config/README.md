@@ -16,6 +16,7 @@ La configuration du robot se fait dans le fichier `robot_config.yaml`. On y retr
     * `x` : sa position en x dans le repère du robot
     * `y` : sa position en y dans le repère du robot
     * `theta` : l'angle d'inclinaison du capteur suivant l'axe `y_robot`.
+* `area_detection_obstacle` qui représente la zone de détection des capteurs.
 
 ## Configuration de la table
 
