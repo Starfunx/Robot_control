@@ -20,9 +20,10 @@ def yaml_data_import(nom_fichier):
 
 
 if __name__ == "__main__":
-    nom_fichier = './src/robot_config.yaml'
-    liste = yaml_data_import(nom_fichier)
-    print(liste)
+    # Pour executer le code en local et avoir les bon import
+    nom_fichier = './src/config/robot_config.yaml'
+    dictionnaire = yaml_data_import(nom_fichier)
+    print(dictionnaire)
     
 
     
