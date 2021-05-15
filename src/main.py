@@ -92,23 +92,11 @@ class RobotControl():
         ## Stratégie d'évitement vers la gauche ou la droite en focntion de l'obstacle
 
         # Gestion de la vitesse pour un obstacle dans les 2 zones --> Arret immédiat
-        if (flag_obstacle_gauche and flag_obstacle_droite):
+        if (flag_obstacle_gauche or flag_obstacle_droite):
             print("------- LES DEUX CAPTEURS ----------")
             # Calculs
             self.consign_linear_speed = 0
             self.consign_angular_speed = 0
-
-        # Gestion de 1 obstacle dans 1 seule zone (avance)
-        elif (flag_obstacle_gauche or flag_obstacle_droite):
-            self.consign_linear_speed = 0
-
-            if (flag_obstacle_droite):
-                print("change goal vers la gauche")
-                self.consign_angular_speed += 0.1
-
-            elif (flag_obstacle_gauche):
-                print("change goal vers la droite")
-                self.consign_angular_speed -= 0.1
 
         # Cas où il n'y a aucun obstacle, on calcule l'objectif
         else:
