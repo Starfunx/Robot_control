@@ -48,7 +48,8 @@ git clone https://github.com/S6ril/Robot_control.git --branch v0.2
 
 Si vous avez du mal avec les lignes de commandes, il reste toujours possible de télécharger la realease directement sur Github dans une archive zip. Vous pouvez ensuite la copier coller sur la Raspberry Pi. 
 
-## Installation version développement
+##
+ Installation version développement
 
 Ce repo se base sur plusieurs sous modules. Dans les versions release, il n'y a plus cette notion pour simplifier les téléchargements. Dans la version développement, les sous modules permettent de développer des scripts élémentaires que l'on ré-utilise dans plusieurs projets.
 
