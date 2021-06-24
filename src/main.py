@@ -120,7 +120,7 @@ class RobotControl():
             dist_robot2goal = self.distance_robot2goal(self.goal)
             angle_robot2goal = self.angle_robot2goal(self.goal)
             angle_goal = self.goal.theta - self.robotPose.theta
-            angle_robot2goal -= angle_goal
+            # angle_robot2goal -= angle_goal
     
             # Dist_sensir(obstacle) -> repère robot
             ############################
@@ -129,7 +129,7 @@ class RobotControl():
             dt = (time.time() - self.time)
             
             self.consign_linear_speed = krho * dist_robot2goal / dt
-            self.consign_angular_speed = kalpha * angle_robot2goal  / dt
+            self.consign_angular_speed = kalpha * constrainAngle(angle_robot2goal) / dt
         
         
         ############################
@@ -175,7 +175,7 @@ class RobotControl():
         X = goal.x - self.robotPose.x
         Y = goal.y - self.robotPose.y
         
-        angle_robot2goal = np.arctan2(Y, X) - self.robotPose.theta
+        angle_robot2goal = constrainAngle( np.arctan2(Y, X) - self.robotPose.theta )
         # print("X =", X, "\tY =", Y, "\tAtan =", angle_robot2goal )  
 
         return angle_robot2goal
@@ -203,8 +203,12 @@ class RobotControl():
             return 0
     
 
+def constrainAngle(x):
+    x = np.fmod(x + np.pi, 2*np.pi)
+    if (x < 0):
+        x += 2*np.pi
 
-
+    return x - np.pi
 
 
 if __name__ == "__main__":
@@ -220,7 +224,8 @@ if __name__ == "__main__":
     robotcontrol = RobotControl(nom_fichier, robot_port, robot_baurate, carte_obstacle_port, carte_obstacle_bauderate)
 
     robotcontrol.robot.set_pose(0, 0, 0)
-    pose = [Pose2D(1000, 0, 0)]
+    pose = [Pose2D(1000, 0, 0),
+            Pose2D(-1000, 0, 0)]
     
     robotcontrol.set_goal(pose[::-1])
     
