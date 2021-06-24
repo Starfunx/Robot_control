@@ -191,6 +191,7 @@ class RobotControl():
                 print("goal", self.goal.x, "; ", self.goal.y)
                 self.goal = self.liste_goal.pop()
                 print("changement goal")
+                print("goal", self.goal.x, "; ", self.goal.y)
 
                 return 0
 
@@ -223,10 +224,12 @@ if __name__ == "__main__":
 
     robotcontrol = RobotControl(nom_fichier, robot_port, robot_baurate, carte_obstacle_port, carte_obstacle_bauderate)
 
-    robotcontrol.robot.set_pose(0, 0, 0)
+    # robotcontrol.robot.set_pose(0, 0, 0)
     pose = [Pose2D(1000, 0, 0),
-            Pose2D(-1000, 0, 0)]
+            Pose2D(0, 0, 0)]
     
+
+
     robotcontrol.set_goal(pose[::-1])
     
     selection_zone = Selection_zone(14, 15)
