@@ -22,7 +22,9 @@ class RobotControl():
 
         # Création des cartes de communications
         self.robot = Robot(robot_port, robot_bauderate)
-        self.carteobstacle = CarteDetecteurObstacle(carte_obstacle_port, carte_obstacle_bauderate)
+
+        if carte_obstacle_port != "":
+            self.carteobstacle = CarteDetecteurObstacle(carte_obstacle_port, carte_obstacle_bauderate)
         
         # COnsigne
         self.consign_linear_speed = 0
@@ -31,6 +33,7 @@ class RobotControl():
 
         # Positions utiles pour le robot
         self.goal = None
+        self.liste_goal = None
         self.goal_save = []
         self.robotPose = self.robot.get_pose()
         
@@ -65,7 +68,8 @@ class RobotControl():
         
         # recup obstacle --> driver carte obstacle
         # Transformation dans le repère du robot en même temps
-        liste_obstacle = self.carteobstacle.get_distance('A')
+        # liste_obstacle = self.carteobstacle.get_distance('A')
+        liste_obstacle = []
         
         # Vérification des distance des capteurs
         for sensor, distance in zip(self.dist_sensor, liste_obstacle):
@@ -77,11 +81,11 @@ class RobotControl():
             ### Vérification de la distance en fonctions des zones (droite ou gauche)
             if self.aire_avant_gauche.contains(point_repère_robot):
                 print("Point à l'avant gauche")
-                flag_obstacle_gauche = True
+                # flag_obstacle_gauche = True
 
             if self.aire_avant_droite.contains(point_repère_robot):
                 print("Point à l'avant droite")
-                flag_obstacle_droite = True
+                # flag_obstacle_droite = True
 
             ## Si on a un obstalce dans les 2 zones, on passe directement à la suite 
             if (flag_obstacle_gauche and flag_obstacle_droite):
@@ -116,6 +120,7 @@ class RobotControl():
             dist_robot2goal = self.distance_robot2goal(self.goal)
             angle_robot2goal = self.angle_robot2goal(self.goal)
             angle_goal = self.goal.theta - self.robotPose.theta
+            angle_robot2goal -= angle_goal
     
             # Dist_sensir(obstacle) -> repère robot
             ############################
@@ -124,7 +129,7 @@ class RobotControl():
             dt = (time.time() - self.time)
             
             self.consign_linear_speed = krho * dist_robot2goal / dt
-            self.consign_angular_speed = kalpha * angle_robot2goal / dt
+            self.consign_angular_speed = kalpha * angle_robot2goal  / dt
         
         
         ############################
@@ -156,8 +161,9 @@ class RobotControl():
     # END FUNCTION UPDATE SPEED
 
 
-    def set_goal(self, pose : Pose2D):
-        self.goal = pose
+    def set_goal(self, pose ):
+        self.liste_goal = pose
+        self.goal = self.liste_goal.pop()
         
     def distance_robot2goal(self, goal : Pose2D):
         dist_robot2goal = np.sqrt(
@@ -170,24 +176,28 @@ class RobotControl():
         Y = goal.y - self.robotPose.y
         
         angle_robot2goal = np.arctan2(Y, X) - self.robotPose.theta
-        
+        # print("X =", X, "\tY =", Y, "\tAtan =", angle_robot2goal )  
+
         return angle_robot2goal
 
     def goal_reached(self):
         # critère dans un yaml
         distance = self.distance_robot2goal(self.goal)
-        nb_goal = len(self.goal_save)
         # print(distance)
 
-        if (nb_goal > 0) and (distance < 100):
-            print(distance)
-            print("goal", self.goal.x, "; ", self.goal.y)
-            
-            self.goal = self.goal_save.pop()
-            return 0
+        if ( (distance < 50) ):
+            if ( len(self.liste_goal) ):
+                print(distance)
+                print("goal", self.goal.x, "; ", self.goal.y)
+                self.goal = self.liste_goal.pop()
+                print("changement goal")
 
-        elif (distance < 50):
-            return 1
+                return 0
+
+            else :
+                print(distance)
+                print("fin")
+                return 1
         
         else:
             return 0
@@ -198,18 +208,26 @@ class RobotControl():
 
 
 if __name__ == "__main__":
+    from module.tirette import Selection_zone
+
     nom_fichier = './config/robot_config.yaml'
     robot_port = "/dev/ttyACM0"
     robot_baurate = 115200
 
-    carte_obstacle_port = "/dev/ttyACM1"
+    carte_obstacle_port = ""
     carte_obstacle_bauderate = 115200
-    
+
     robotcontrol = RobotControl(nom_fichier, robot_port, robot_baurate, carte_obstacle_port, carte_obstacle_bauderate)
 
     robotcontrol.robot.set_pose(0, 0, 0)
-    pose = Pose2D(2000, 000, 0)
-    robotcontrol.set_goal(pose)   
+    pose = [Pose2D(1000, 0, 0)]
+    
+    robotcontrol.set_goal(pose[::-1])
+    
+    selection_zone = Selection_zone(14, 15)
+    # selection_zone.wait_start_loop()
+
+    print("Zone de départ :", selection_zone.zone)
 
     robotcontrol.robot.enable_motors()
     try:
