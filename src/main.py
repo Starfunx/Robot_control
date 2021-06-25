@@ -1,4 +1,5 @@
 from module.tirette import Selection_zone
+from module.servo import servo_init, servo_move_max, servo_move_min
 from external.API_interface.TLF_API.component.Class_Pose2D import Pose2D
 
 from robot_package.RobotControl import RobotControl
@@ -19,6 +20,7 @@ pose = [Pose2D(1000, 0, 0),
 robotcontrol.set_goal(pose[::-1])
 
 selection_zone = Selection_zone(14, 15)
+SERVO = servo_init()
  # selection_zone.wait_start_loop()
 
 print("Zone de départ :", selection_zone.zone)
@@ -27,6 +29,10 @@ robotcontrol.robot.enable_motors()
 try:
     while not(robotcontrol.goal_reached()):
         # Mettre 10 Hz
+        if (robotcontrol.distance_robot2goal(Pose2D(1000, 0, 0)) < 500):
+            servo_move_max(SERVO)
+        else:
+            servo_move_min(SERVO)
         robotcontrol.update_speed()
 
 except KeyboardInterrupt:

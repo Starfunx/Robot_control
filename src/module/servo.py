@@ -6,9 +6,9 @@ from time import sleep
 Device.pin_factory = RPiGPIOFactory()
 
 
-def servo_init():
-    servo = Servo(17)
-    servo2 = Servo(27)
+def servo_init(pin_servo = 17, pin_servo2 = 27):
+    servo = Servo(pin_servo)
+    servo2 = Servo(pin_servo2)
 
     SERVO = [servo, servo2]
     servo_move_min(SERVO)
