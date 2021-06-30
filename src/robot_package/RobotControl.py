@@ -197,7 +197,7 @@ class RobotControl():
 
             else :
                 print(distance)
-                print("fin")
+                print("Déplacement terminé")
                 return 1
         
         else:
