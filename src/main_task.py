@@ -2,6 +2,7 @@ from external.API_interface.TLF_API.component.Class_Pose2D import Pose2D
 from gpiozero.pins.rpigpio import RPiGPIOFactory
 from gpiozero import Servo, Device
 from module.servo_cote import Servo_cote
+from module.tirette import Selection_zone
 
 
 from robot_package.RobotControl import RobotControl
@@ -113,7 +114,8 @@ servo_drapeau.min()
 #########################################
 # Main programme
 ##########################################
-
+selection_zone = Selection_zone(14, 15)
+# selection_zone.wait_start_loop()
 
 
 Tmax = 15.0 #secondes
