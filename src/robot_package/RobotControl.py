@@ -161,7 +161,11 @@ class RobotControl():
     # END FUNCTION UPDATE SPEED
 
 
-    def set_goal(self, pose ):
+    def set_goal(self, pose : Pose2D):
+        self.liste_goal = []
+        self.goal = pose
+
+    def set_liste_goal(self, pose ):
         self.liste_goal = pose
         self.goal = self.liste_goal.pop()
         
@@ -186,7 +190,7 @@ class RobotControl():
         # print(distance)
 
         if ( (distance < 50) ):
-            if ( len(self.liste_goal) ):
+            if ( len(self.liste_goal) > 0 ):
                 print(distance)
                 print("goal", self.goal.x, "; ", self.goal.y)
                 self.goal = self.liste_goal.pop()
