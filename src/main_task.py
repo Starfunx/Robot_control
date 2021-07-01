@@ -60,14 +60,22 @@ def retract_servo():
     time.sleep(0.1)
 
 def wait():
-    time.sleep(0.3)
+    time.sleep(2)
 
 def wait2():
     time.sleep(2)
 
+
+def wait3():
+    time.sleep(5)
+
 def lever_drapeau():
     global servo_drapeau
     servo_drapeau.max()
+
+def baisser_drapeau():
+    global servo_drapeau
+    servo_drapeau.min()
 
 
 # Creation des tasks
@@ -77,8 +85,11 @@ task_deplacer_0 = Task(deplacer_0)
 task_deploye_servo = Task(deploye_servo)
 task_retract_servo = Task(retract_servo)
 task_wait = Task(wait)
+task_wait2 = Task(wait3)
 task_wait_deplacement = Task(wait2)
 task_lever_drapeau = Task(lever_drapeau)
+task_baisser_drapeau = Task(baisser_drapeau)
+task_stop_robot = Task(stop_robot)
 
 ############################################
 # Création du robot
@@ -126,25 +137,36 @@ t = t0
 while t < t0+Tmax:
 
     task_deplacer_1000.start()
-    task_deploye_servo.start()
+    task_wait.start()
+    # task_deploye_servo.start()
 
     if task_deplacer_1000.done:
         task_wait_deplacement.start()
     
-    if task_deplacer_0.done:
-        task_lever_drapeau.start()
+    # if task_deplacer_0.done:
+    #     task_lever_drapeau.start()
     
     if task_wait_deplacement.done:
         task_deplacer_0.start()
     
+    if task_deplacer_0.done:
+        task_stop_robot.start()
 
-    if task_deploye_servo.done:
-        task_wait.start()
+    # if task_deploye_servo.done:
+    #     task_wait.start()
     
     if task_wait.done:
-        task_retract_servo.start()
+        task_lever_drapeau.start()
+
+    if task_lever_drapeau.done:
+        task_wait2.start()
+    
+    if task_wait2.done:
+        task_baisser_drapeau.start()
 
     t = time.time()
+
+
 
 # End loop
 
@@ -155,10 +177,14 @@ task_deplacer_0.stop()
 task_deploye_servo.stop()
 task_retract_servo.stop()
 task_wait.stop()
+task_wait2.stop()
 task_wait_deplacement.stop()
+task_baisser_drapeau.stop()
+task_lever_drapeau.stop()
+task_stop_robot.stop()
+
 
 stop_robot() 
-
 
 time.sleep(2)
 print("FIN Programme")
