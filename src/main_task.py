@@ -64,6 +64,10 @@ def wait():
 def wait2():
     time.sleep(2)
 
+def lever_drapeau():
+    global servo_drapeau
+    servo_drapeau.max()
+
 
 # Creation des tasks
 task_deplacer_1000 = Task(deplacer_1000)
@@ -73,6 +77,7 @@ task_deploye_servo = Task(deploye_servo)
 task_retract_servo = Task(retract_servo)
 task_wait = Task(wait)
 task_wait_deplacement = Task(wait2)
+task_lever_drapeau = Task(lever_drapeau)
 
 ############################################
 # Création du robot
@@ -98,6 +103,12 @@ robotcontrol = RobotControl(nom_fichier, robot_port, robot_baurate, carte_obstac
 Device.pin_factory = RPiGPIOFactory()
 servo_cote = Servo_cote(27, 17)
 
+# Module pour le drapeau
+maxPW = (1.7+0.45)/1000      # terme de correction pour faire 180°
+minPW = (1.0-0.45)/1000      # terme de correction pour faire 180°
+servo_drapeau = Servo(22, min_pulse_width=minPW, max_pulse_width=maxPW)
+servo_drapeau.min()
+
 
 #########################################
 # Main programme
@@ -117,6 +128,9 @@ while t < t0+Tmax:
 
     if task_deplacer_1000.done:
         task_wait_deplacement.start()
+    
+    if task_deplacer_0.done:
+        task_lever_drapeau.start()
     
     if task_wait_deplacement.done:
         task_deplacer_0.start()
