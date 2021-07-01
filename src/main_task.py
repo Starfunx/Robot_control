@@ -96,10 +96,7 @@ robotcontrol = RobotControl(nom_fichier, robot_port, robot_baurate, carte_obstac
 
 # Module servo sur le coté
 Device.pin_factory = RPiGPIOFactory()
-servo_gauche = Servo(17)
-servo_droite = Servo(27)
-
-servo_cote = Servo_cote(servo_droite, servo_gauche)
+servo_cote = Servo_cote(27, 17)
 
 
 #########################################

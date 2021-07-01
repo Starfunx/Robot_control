@@ -3,10 +3,10 @@ from gpiozero import Servo, Device
 
 
 class Servo_cote():
-    def __init__(self, servo_gauche, servo_droite):
+    def __init__(self, pin_gauche, pin_droite):
         Device.pin_factory = RPiGPIOFactory()
-        self.servo_gauche = servo_gauche
-        self.servo_droite = servo_droite
+        self.servo_gauche = Servo(pin_gauche)
+        self.servo_droite = Servo(pin_droite)
 
     def move_min(self):
         self.servo_droite.min()
