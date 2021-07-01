@@ -1,0 +1,39 @@
+from gpiozero.pins.rpigpio import RPiGPIOFactory
+from gpiozero import Servo, Device
+
+
+class Servo_cote():
+    def __init__(self, servo_gauche, servo_droite):
+        Device.pin_factory = RPiGPIOFactory()
+        self.servo_gauche = servo_gauche
+        self.servo_droite = servo_droite
+
+    def move_min(self):
+        self.servo_droite.min()
+        self.servo_gauche.max()
+    
+    def move_max(self):
+        self.servo_droite.max()
+        self.servo_gauche.min()
+
+
+
+
+if __name__ == "__main__":
+    
+    from time import sleep
+
+    pin_servo_gauche = 17
+    pin_servo_droite = 27
+
+    servo_gauche = Servo(pin_servo_gauche)
+    servo_droite = Servo(pin_servo_droite)
+
+    servo_cote = Servo_cote(servo_droite, servo_gauche)
+
+    while True:
+        servo_cote.move_max()
+        sleep(2)
+        servo_cote.move_min()
+        sleep(2)
+
