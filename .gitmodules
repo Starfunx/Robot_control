@@ -7,3 +7,6 @@
 [submodule "src/external/API_interface"]
 	path = src/external/API_interface
 	url = https://github.com/S6ril/API-interface-python.git
+[submodule "src/task_manager"]
+	path = src/task_manager
+	url = https://github.com/Starfunx/Robot_task.git
