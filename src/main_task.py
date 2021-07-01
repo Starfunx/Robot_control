@@ -5,7 +5,7 @@ from module.servo_cote import Servo_cote
 
 
 from robot_package.RobotControl import RobotControl
-from task_manager.task_manager import Task
+from task_manager import Task
 import time
 
 
