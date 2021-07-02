@@ -41,23 +41,22 @@ def wait(t):
 
 
 # Modules
-def deploye_servo():
+def servo(valeur):
     global servo_cote
-    servo_cote.move_max()
+    if valeur == 1:
+        servo_cote.move_max()
+    else:
+        servo_cote.move_min()
     time.sleep(0.1)
 
-def retract_servo():
-    global servo_cote
-    servo_cote.move_min()
-    time.sleep(0.1)
 
-def lever_drapeau():
+def drapeau(valeur):
     global servo_drapeau
-    servo_drapeau.max()
+    if valeur == 1:
+        servo_drapeau.max()
+    else :
+        servo_drapeau.min()
 
-def baisser_drapeau():
-    global servo_drapeau
-    servo_drapeau.min()
 
 ###
 # Creation des tasks
@@ -74,12 +73,12 @@ task_wait_deplacement = Task(lambda : wait(2))
 
 ### Modules
 # Bras sur les côtés
-task_deploye_servo = Task(deploye_servo)
-task_retract_servo = Task(retract_servo)
+task_deploye_servo = Task(lambda : servo(1))
+task_retract_servo = Task(lambda : servo(-1))
 
 # Drapeau
-task_lever_drapeau = Task(lever_drapeau)
-task_baisser_drapeau = Task(baisser_drapeau)
+task_lever_drapeau = Task(lambda : drapeau(1))
+task_baisser_drapeau = Task(lambda : drapeau(-1))
 
 ############################################
 # Création du robot
