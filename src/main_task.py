@@ -59,15 +59,8 @@ def retract_servo():
     servo_cote.move_min()
     time.sleep(0.1)
 
-def wait():
-    time.sleep(2)
-
-def wait2():
-    time.sleep(2)
-
-
-def wait3():
-    time.sleep(5)
+def wait(t):
+    time.sleep(t)
 
 def lever_drapeau():
     global servo_drapeau
@@ -84,9 +77,11 @@ task_deplacer_0 = Task(deplacer_0)
 
 task_deploye_servo = Task(deploye_servo)
 task_retract_servo = Task(retract_servo)
-task_wait = Task(wait)
-task_wait2 = Task(wait3)
-task_wait_deplacement = Task(wait2)
+
+task_wait = Task(lambda : wait(2))
+task_wait2 = Task(lambda: wait(5))
+task_wait_deplacement = Task(lambda : wait(2))
+
 task_lever_drapeau = Task(lever_drapeau)
 task_baisser_drapeau = Task(baisser_drapeau)
 task_stop_robot = Task(stop_robot)
