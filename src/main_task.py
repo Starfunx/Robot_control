@@ -15,6 +15,7 @@ import time
 # Creation de la stratégie
 #########################################
 
+# Déplacement
 def go_to(goal: Pose2D):
     global robotcontrol
     robotcontrol.set_goal(goal)
@@ -33,19 +34,22 @@ def stop_robot():
     robotcontrol.robot.set_speed(0, 0)
     robotcontrol.robot.disable_motors()
 
+
+# Attente
+def wait(t):
+    time.sleep(t)
+
+
+# Modules
 def deploye_servo():
     global servo_cote
     servo_cote.move_max()
     time.sleep(0.1)
 
-
 def retract_servo():
     global servo_cote
     servo_cote.move_min()
     time.sleep(0.1)
-
-def wait(t):
-    time.sleep(t)
 
 def lever_drapeau():
     global servo_drapeau
@@ -58,7 +62,6 @@ def baisser_drapeau():
 ###
 # Creation des tasks
 ###
-
 # De déplacement
 task_deplacer_1000 = Task(lambda : go_to(Pose2D(1000, 0, 0)))
 task_deplacer_0 = Task(lambda: go_to(Pose2D(0, 0, 0)))
