@@ -15,6 +15,14 @@ class Servo_cote():
     def move_max(self):
         self.servo_droite.max()
         self.servo_gauche.min()
+    
+    def move_mirror(self, valeur):
+        self.servo_droite.value = valeur
+        self.servo_gauche.value = -valeur
+    
+    def move(self, valeur_droite, valeur_gauche):
+        self.servo_droite.value = valeur_droite
+        self.servo_gauche.value = valeur_gauche
 
 
 
