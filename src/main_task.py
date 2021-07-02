@@ -4,6 +4,11 @@ from gpiozero import Servo, Device
 from module.servo_cote import Servo_cote
 from module.tirette import Selection_zone
 
+# import matplotlib
+# matplotlib.use('Agg')
+# import matplotlib.pyplot as plt
+# from external.affichage_ecran import Ecran
+
 
 from robot_package.RobotControl import RobotControl
 from task_manager import Task
@@ -53,6 +58,11 @@ def drapeau(valeur):
     global servo_drapeau
     servo_drapeau.value = valeur
 
+# def display_ecran():
+#     global ecran
+#     global score
+#     ecran.update_text(score)
+#     plt.pause(1.0/30)
 
 
 ###
@@ -77,6 +87,7 @@ task_retract_servo = Task(lambda : servo(-1))
 task_lever_drapeau = Task(lambda : drapeau(-1))
 task_baisser_drapeau = Task(lambda : drapeau(1))
 
+# task_affichage_ecran = Task(display_ecran)
 ############################################
 # Création du robot
 ############################################
@@ -120,8 +131,13 @@ Tmax = 15.0 #secondes
 # start
 t0 = time.time()
 t = t0
+
+# ecran = Ecran()
+# score = 0
 # Main loop
 while t < t0+Tmax:
+    # task_affichage_ecran.start()
+    # score +=1
 
     task_deplacer_1000.start()
     task_wait.start()
@@ -161,7 +177,7 @@ while t < t0+Tmax:
 # End loop
 
 
-
+# task_affichage_ecran.stop()
 task_deplacer_1000.stop()
 task_deplacer_0.stop()
 task_deploye_servo.stop()
