@@ -15,23 +15,8 @@ import time
 # Creation de la stratégie
 #########################################
 
-def deplacer_1000():
+def go_to(goal: Pose2D):
     global robotcontrol
-    goal = Pose2D(1000, 0, 0)
-    robotcontrol.set_goal(goal)
-
-    robotcontrol.robot.enable_motors()
-
-    while not(robotcontrol.goal_reached()):
-        robotcontrol.update_speed()
-    
-    robotcontrol.robot.set_speed(0, 0)
-    robotcontrol.robot.disable_motors()
-
-
-def deplacer_0():
-    global robotcontrol
-    goal = Pose2D(0, 0, 0)
     robotcontrol.set_goal(goal)
 
     robotcontrol.robot.enable_motors()
@@ -70,21 +55,28 @@ def baisser_drapeau():
     global servo_drapeau
     servo_drapeau.min()
 
-
+###
 # Creation des tasks
-task_deplacer_1000 = Task(deplacer_1000)
-task_deplacer_0 = Task(deplacer_0)
+###
 
-task_deploye_servo = Task(deploye_servo)
-task_retract_servo = Task(retract_servo)
+# De déplacement
+task_deplacer_1000 = Task(lambda : go_to(Pose2D(1000, 0, 0)))
+task_deplacer_0 = Task(lambda: go_to(Pose2D(0, 0, 0)))
+task_stop_robot = Task(stop_robot)
 
+# Attente
 task_wait = Task(lambda : wait(2))
 task_wait2 = Task(lambda: wait(5))
 task_wait_deplacement = Task(lambda : wait(2))
 
+### Modules
+# Bras sur les côtés
+task_deploye_servo = Task(deploye_servo)
+task_retract_servo = Task(retract_servo)
+
+# Drapeau
 task_lever_drapeau = Task(lever_drapeau)
 task_baisser_drapeau = Task(baisser_drapeau)
-task_stop_robot = Task(stop_robot)
 
 ############################################
 # Création du robot
