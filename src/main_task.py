@@ -42,20 +42,17 @@ def wait(t):
 
 # Modules
 def servo(valeur):
+    """ Max = 1 | Mid = 0 | Min = -1 """
     global servo_cote
-    if valeur == 1:
-        servo_cote.move_max()
-    else:
-        servo_cote.move_min()
+    servo_cote.move_mirror(valeur)
     time.sleep(0.1)
 
 
 def drapeau(valeur):
+    """ Max = 1 | Mid = 0 | Min = -1 """
     global servo_drapeau
-    if valeur == 1:
-        servo_drapeau.max()
-    else :
-        servo_drapeau.min()
+    servo_drapeau.value = valeur
+
 
 
 ###
@@ -127,10 +124,13 @@ while t < t0+Tmax:
 
     task_deplacer_1000.start()
     task_wait.start()
-    # task_deploye_servo.start()
+    task_deploye_servo.start()
 
     if task_deplacer_1000.done:
         task_wait_deplacement.start()
+        
+        if task_deploye_servo.done:
+            task_retract_servo.start()
     
     # if task_deplacer_0.done:
     #     task_lever_drapeau.start()
