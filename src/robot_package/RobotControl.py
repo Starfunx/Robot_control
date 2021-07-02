@@ -60,8 +60,8 @@ class RobotControl():
 
 
         # Constantes
-        krho = 0.2
-        kalpha = 1
+        krho = 0.8
+        kalpha = 4
         flag_obstacle_droite = 0
         flag_obstacle_gauche = 0
 
