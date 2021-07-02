@@ -49,7 +49,7 @@ def servo(valeur):
 
 
 def drapeau(valeur):
-    """ Max = 1 | Mid = 0 | Min = -1 """
+    """ levée = -1 | Mid = 0 | bas = 1 """
     global servo_drapeau
     servo_drapeau.value = valeur
 
@@ -74,8 +74,8 @@ task_deploye_servo = Task(lambda : servo(1))
 task_retract_servo = Task(lambda : servo(-1))
 
 # Drapeau
-task_lever_drapeau = Task(lambda : drapeau(1))
-task_baisser_drapeau = Task(lambda : drapeau(-1))
+task_lever_drapeau = Task(lambda : drapeau(-1))
+task_baisser_drapeau = Task(lambda : drapeau(1))
 
 ############################################
 # Création du robot
@@ -96,9 +96,10 @@ robotcontrol = RobotControl(nom_fichier, robot_port, robot_baurate, carte_obstac
 ###########################################
 # Creation des modules
 ###########################################
+# Pour les différents servos
+Device.pin_factory = RPiGPIOFactory()
 
 # Module servo sur le coté
-Device.pin_factory = RPiGPIOFactory()
 servo_cote = Servo_cote(27, 17)
 
 # Module pour le drapeau
