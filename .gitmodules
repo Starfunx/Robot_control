@@ -10,3 +10,6 @@
 [submodule "src/task_manager"]
 	path = src/task_manager
 	url = https://github.com/Starfunx/Robot_task.git
+[submodule "src/external/affichage_ecran"]
+	path = src/external/affichage_ecran
+	url = https://github.com/S6ril/Affichage_ecran.git
