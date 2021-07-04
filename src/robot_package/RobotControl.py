@@ -60,8 +60,8 @@ class RobotControl():
 
 
         # Constantes
-        krho = 0.8
-        kalpha = 4
+        krho = 0.2
+        kalpha = 1
         flag_obstacle_droite = 0
         flag_obstacle_gauche = 0
 
@@ -160,6 +160,28 @@ class RobotControl():
         # self.mesure_vitesse_roue_droite.append(right_wheel.measure)
     # END FUNCTION UPDATE SPEED
 
+    def set_angle(self, angle):
+        angle = self.robotPose.theta + angle
+
+        angle_robot2angle = angle - self.robotPose.theta
+        sens = angle_robot2angle/abs(angle_robot2angle)
+
+        while (abs(angle_robot2angle) > 0.7):
+            kalpha = sens * angle_robot2angle *0.1
+            self.consign_linear_speed = 0
+            self.consign_angular_speed = kalpha * angle_robot2angle 
+
+            self.robot.set_speed(self.consign_linear_speed, self.consign_angular_speed)
+
+            self.robotPose = self.robot.get_pose()
+            angle_robot2angle = angle - self.robotPose.theta
+            sens = angle_robot2angle/abs(angle_robot2angle)
+
+
+        self.robot.set_speed(0, 0)
+
+
+
 
     def set_goal(self, pose : Pose2D):
         self.liste_goal = []
@@ -186,10 +208,13 @@ class RobotControl():
 
     def goal_reached(self):
         # critère dans un yaml
+        if self.goal == None:
+            return 1
+
         distance = self.distance_robot2goal(self.goal)
         # print(distance)
 
-        if ( (distance < 50) ):
+        if ( (distance < 100) ):
             if ( len(self.liste_goal) > 0 ):
                 print(distance)
                 print("goal", self.goal.x, "; ", self.goal.y)
