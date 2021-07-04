@@ -161,24 +161,26 @@ class RobotControl():
     # END FUNCTION UPDATE SPEED
 
     def set_angle(self, angle):
-        angle = self.robotPose.theta + angle
+        angle = constrainAngle(self.robotPose.theta + angle)
 
         angle_robot2angle = angle - self.robotPose.theta
-        sens = angle_robot2angle/abs(angle_robot2angle)
+
+        #0.85 measure 0.00 command 0.35
 
         while (abs(angle_robot2angle) > 0.7):
-            kalpha = sens * angle_robot2angle *0.1
+            kalpha = angle_robot2angle *0.5
+            print(kalpha)
+
             self.consign_linear_speed = 0
-            self.consign_angular_speed = kalpha * angle_robot2angle 
+            self.consign_angular_speed = kalpha 
 
             self.robot.set_speed(self.consign_linear_speed, self.consign_angular_speed)
 
             self.robotPose = self.robot.get_pose()
             angle_robot2angle = angle - self.robotPose.theta
-            sens = angle_robot2angle/abs(angle_robot2angle)
 
-
-        self.robot.set_speed(0, 0)
+        self.consign_linear_speed, self.consign_angular_speed = 0, 0
+        self.robot.set_speed(self.consign_linear_speed, self.consign_angular_speed)
 
 
 
