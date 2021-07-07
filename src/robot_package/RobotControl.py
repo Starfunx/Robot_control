@@ -1,3 +1,4 @@
+from re import S
 from numpy.core.numeric import False_
 from external.API_interface import Robot
 from external.API_interface.TLF_API.component.Class_Pose2D import Pose2D
@@ -23,8 +24,8 @@ class RobotControl():
         # Création des cartes de communications
         self.robot = Robot(robot_port, robot_bauderate)
 
-        if carte_obstacle_port != "":
-            self.carteobstacle = CarteDetecteurObstacle(carte_obstacle_port, carte_obstacle_bauderate)
+        # if carte_obstacle_port != "":
+        self.carteobstacle = CarteDetecteurObstacle(carte_obstacle_port, carte_obstacle_bauderate)
         
         # COnsigne
         self.consign_linear_speed = 0
@@ -68,55 +69,63 @@ class RobotControl():
         
         # recup obstacle --> driver carte obstacle
         # Transformation dans le repère du robot en même temps
-        # liste_obstacle = self.carteobstacle.get_distance('A')
-        liste_obstacle = []
+        liste_obstacle = self.carteobstacle.get_distance('A')
+        # print(liste_obstacle)
+        # liste_obstacle = []
         
-        # Vérification des distance des capteurs
-        for sensor, distance in zip(self.dist_sensor, liste_obstacle):
-            # Liaison des distances réelles aux capteurs virtuels --> Connaitre position de l'obstacle
-            sensor.set_dist(distance, 0)
-            # Projection dans le repère du robot
-            point_repère_robot = MultiPoint(np.transpose(sensor.get_obstacle_pose()))
+        # # Vérification des distance des capteurs
+        # for sensor, distance in zip(self.dist_sensor, liste_obstacle):
+        #     # Liaison des distances réelles aux capteurs virtuels --> Connaitre position de l'obstacle
+        #     sensor.set_dist(distance, 0)
+        #     # Projection dans le repère du robot
+        #     point_repère_robot = MultiPoint(np.transpose(sensor.get_obstacle_pose()))
             
-            ### Vérification de la distance en fonctions des zones (droite ou gauche)
-            if self.aire_avant_gauche.contains(point_repère_robot):
-                print("Point à l'avant gauche")
-                # flag_obstacle_gauche = True
+        #     ### Vérification de la distance en fonctions des zones (droite ou gauche)
+        #     if self.aire_avant_gauche.contains(point_repère_robot):
+        #         print("Point à l'avant gauche")
+        #         flag_obstacle_gauche = True
 
-            if self.aire_avant_droite.contains(point_repère_robot):
-                print("Point à l'avant droite")
-                # flag_obstacle_droite = True
+        #     if self.aire_avant_droite.contains(point_repère_robot):
+        #         print("Point à l'avant droite")
+        #         flag_obstacle_droite = True
 
-            ## Si on a un obstalce dans les 2 zones, on passe directement à la suite 
-            if (flag_obstacle_gauche and flag_obstacle_droite):
-                # Emergency
-                break
+        #     ## Si on a un obstalce dans les 2 zones, on passe directement à la suite 
+        #     if (flag_obstacle_gauche or flag_obstacle_droite):
+        #         # Emergency
+        #         break
+
+        if (liste_obstacle[0] < 500 or liste_obstacle[1] < 500):
+            print("Obtacle detecté")
+            self.consign_linear_speed = 0
+            self.consign_angular_speed = 0
+            self.robot.disable_motors()
+
+
 
         ##################################
         ## Stratégie d'évitement vers la gauche ou la droite en focntion de l'obstacle
 
         # Gestion de la vitesse pour un obstacle dans les 2 zones --> Arret immédiat
-        if (flag_obstacle_gauche and flag_obstacle_droite):
-            print("------- LES DEUX CAPTEURS ----------")
-            # Calculs
-            self.consign_linear_speed = 0
-            self.consign_angular_speed = 0
+        # if (flag_obstacle_gauche or flag_obstacle_droite):
+        #     print("------- LES DEUX CAPTEURS ----------")
+        #     # Calculs
 
-        # Gestion de 1 obstacle dans 1 seule zone (avance)
-        elif (flag_obstacle_gauche or flag_obstacle_droite):
-            self.consign_linear_speed = 0
+        # # Gestion de 1 obstacle dans 1 seule zone (avance)
+        # elif (flag_obstacle_gauche or flag_obstacle_droite):
+        #     self.consign_linear_speed = 0
 
-            if (flag_obstacle_droite):
-                print("change goal vers la gauche")
-                self.consign_angular_speed += 0.1
+        #     if (flag_obstacle_droite):
+        #         print("change goal vers la gauche")
+        #         self.consign_angular_speed += 0.1
 
-            elif (flag_obstacle_gauche):
-                print("change goal vers la droite")
-                self.consign_angular_speed -= 0.1
+        #     elif (flag_obstacle_gauche):
+        #         print("change goal vers la droite")
+        #         self.consign_angular_speed -= 0.1
 
         # Cas où il n'y a aucun obstacle, on calcule l'objectif
         else:
             # Calculs si il n'y a aucun obstacle
+            self.robot.enable_motors()
             dist_robot2goal = self.distance_robot2goal(self.goal)
             angle_robot2goal = self.angle_robot2goal(self.goal)
             angle_goal = self.goal.theta - self.robotPose.theta
@@ -144,7 +153,7 @@ class RobotControl():
         #
         # FAIRE SCH2MA
         #
-        
+        # print(self.consign_linear_speed, self.consign_angular_speed)
         self.robot.set_speed(self.consign_linear_speed, self.consign_angular_speed)
         self.time = time.time()
 
@@ -169,7 +178,7 @@ class RobotControl():
 
         while (abs(angle_robot2angle) > 0.7):
             kalpha = angle_robot2angle *0.5
-            print(kalpha)
+            # print(kalpha)
 
             self.consign_linear_speed = 0
             self.consign_angular_speed = kalpha 

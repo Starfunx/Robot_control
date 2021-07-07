@@ -30,7 +30,7 @@ print(data.x, data.y, data.theta)
 pose = [Pose2D(1000, 0, 0),
         Pose2D(0, 0, 0)]
 
-# robotcontrol.set_liste_goal(pose[::-1])
+robotcontrol.set_liste_goal(pose[::-1])
 
 
 selection_zone = Selection_zone(14, 15)
@@ -40,11 +40,11 @@ print("Zone de départ :", selection_zone.zone)
 
 robotcontrol.robot.enable_motors()
 
-robotcontrol.set_angle(-np.pi/2)
-print("sleep")
-time.sleep(2)
-print("changement")
-robotcontrol.set_angle(+np.pi/2)
+# robotcontrol.set_angle(-np.pi/2)
+# print("sleep")
+# time.sleep(2)
+# print("changement")
+# robotcontrol.set_angle(+np.pi/2)
 
 try:
     while not(robotcontrol.goal_reached()):

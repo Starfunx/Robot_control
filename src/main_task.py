@@ -14,7 +14,7 @@ from robot_package.RobotControl import RobotControl
 from task_manager import Task
 import time
 
-
+import numpy as np
 
 #########################################
 # Creation de la stratégie
@@ -30,6 +30,33 @@ def go_to(goal: Pose2D):
     while not(robotcontrol.goal_reached()):
         robotcontrol.update_speed()
     
+    robotcontrol.robot.set_speed(0, 0)
+    robotcontrol.robot.disable_motors()
+
+# Déplacement angulaire
+def go_to_angle(angle: float):
+    global robotcontrol
+    robotcontrol.robot.enable_motors()
+
+
+    def mod(a, n):
+        return (a%n+n)%n
+
+    Kalpha = 0.05
+
+    Beta = 10
+    while abs(Beta) >= 0.1:
+        pose = robotcontrol.robot.get_pose()
+        theta = pose.theta
+
+        # calcul angle Beta
+        Beta = angle - theta
+        Beta = mod(Beta + np.pi, 2*np.pi) - np.pi
+        # print(Beta)
+        ang_speed = -Kalpha * Beta
+
+        robotcontrol.robot.set_speed(0.0, ang_speed)
+
     robotcontrol.robot.set_speed(0, 0)
     robotcontrol.robot.disable_motors()
     
@@ -72,6 +99,7 @@ def drapeau(valeur):
 task_deplacer_1000 = Task(lambda : go_to(Pose2D(1000, 0, 0)))
 task_deplacer_0 = Task(lambda: go_to(Pose2D(0, 0, 0)))
 task_stop_robot = Task(stop_robot)
+task_DeplacerAngle = Task(lambda: go_to_angle(np.pi/3))
 
 # Attente
 task_wait = Task(lambda : wait(2))
@@ -98,12 +126,13 @@ robot_port = "/dev/ttyACM0"
 robot_baurate = 115200
 
 # Carte obstacle
-carte_obstacle_port = ""
+carte_obstacle_port = "/dev/ttyUSB0"
 carte_obstacle_bauderate = 115200
 
 robotcontrol = RobotControl(nom_fichier, robot_port, robot_baurate, carte_obstacle_port, carte_obstacle_bauderate)
-
-
+robotcontrol.robot.set_pose(0, 0, 0)
+# robotcontrol.robot.set_pid_left( 0.162, 0.024,  0.006)
+# robotcontrol.robot.set_pid_right(0.162, 0.024,  0.006)
 ###########################################
 # Creation des modules
 ###########################################
@@ -140,35 +169,16 @@ while t < t0+Tmax:
     # score +=1
 
     task_deplacer_1000.start()
-    task_wait.start()
-    task_deploye_servo.start()
 
-    if task_deplacer_1000.done:
-        task_wait_deplacement.start()
-        
-        if task_deploye_servo.done:
-            task_retract_servo.start()
-    
-    # if task_deplacer_0.done:
-    #     task_lever_drapeau.start()
-    
-    if task_wait_deplacement.done:
-        task_deplacer_0.start()
-    
-    if task_deplacer_0.done:
-        task_stop_robot.start()
+    # if task_deplacer_1000.done:
+    #     task_wait.start() 
 
-    # if task_deploye_servo.done:
-    #     task_wait.start()
+    # if task_wait.done:
+    # task_DeplacerAngle.start() 
     
-    if task_wait.done:
-        task_lever_drapeau.start()
+    # if task_DeplacerAngle.done:
+    #     task_deplacer_0.start() 
 
-    if task_lever_drapeau.done:
-        task_wait2.start()
-    
-    if task_wait2.done:
-        task_baisser_drapeau.start()
 
     t = time.time()
 
@@ -183,14 +193,11 @@ task_deplacer_0.stop()
 task_deploye_servo.stop()
 task_retract_servo.stop()
 task_wait.stop()
-task_wait2.stop()
-task_wait_deplacement.stop()
-task_baisser_drapeau.stop()
-task_lever_drapeau.stop()
 task_stop_robot.stop()
+task_DeplacerAngle.stop()
 
-
-stop_robot() 
+for _ in range(150):
+    stop_robot() 
 
 time.sleep(2)
 print("FIN Programme")
