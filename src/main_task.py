@@ -106,8 +106,10 @@ def vitesse(v_lin: float, v_ang:float, temps:float):
 # Creation des tasks
 ###
 # De déplacement
-point_depart = Pose2D(250, 1310, np.pi/2)
+point_depart = Pose2D(0, 0, 0)
 task_go_point_phare = Task(lambda: go_to(Pose2D(220, 1840)))
+task_1000 = Task(lambda: go_to(Pose2D(1000, 0)))
+
 task_tourner_vers_phare = Task(lambda: go_to_angle(np.pi/2))
 task_vitesse_phare = Task(lambda: vitesse(10, 0, 3))
 
@@ -152,6 +154,7 @@ Device.pin_factory = RPiGPIOFactory()
 
 # Module servo sur le coté
 servo_cote = Servo_cote(27, 17)
+servo_cote.move_mirror(-1)
 
 
 servo_drapeau = Servo(22)
@@ -162,11 +165,11 @@ servo_drapeau.value = -0.5
 # Main programme
 ##########################################
 selection_zone = Selection_zone(14, 15)
-# selection_zone.wait_start_loop()
+selection_zone.wait_start_loop()
 
 
 t0 = time.time()
-Tmax = 20 #secondes
+Tmax = 100 #secondes
 T_Drapeau = Tmax-5 #secondes
 # start
 t = 0
@@ -177,7 +180,7 @@ t = 0
 while t < Tmax:
     # print(t)
 
-    task_vitesse_phare.start()
+    task_1000.start()
 
 
 
@@ -192,7 +195,7 @@ while t < Tmax:
 
 # End loop
 task_lever_drapeau.stop()
-task_vitesse_phare.stop()
+task_1000.stop()
 
 
 for _ in range(150):

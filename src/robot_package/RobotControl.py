@@ -43,7 +43,7 @@ class RobotControl():
         self.consigne_vitesse_lineaire = []
         self.mesure_vitesse_roue_gauche = []
         self.mesure_vitesse_roue_droite = []
-        self.dist_obstacle = 90 + 80
+        self.dist_obstacle = 300
 
         self.time = time.time()
 
@@ -58,6 +58,7 @@ class RobotControl():
         # update vitesse vitesse angulaire en fonction des obstacles
         # Recupére position --> driver robot
         self.robotPose = self.robot.get_pose()
+        # print(self.robotPose)
 
 
 
