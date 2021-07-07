@@ -109,7 +109,7 @@ def vitesse(v_lin: float, v_ang:float, temps:float):
 point_depart = Pose2D(250, 1310, np.pi/2)
 task_go_point_phare = Task(lambda: go_to(Pose2D(220, 1840)))
 task_tourner_vers_phare = Task(lambda: go_to_angle(np.pi/2))
-task_vitesse_phare = Task(lambda: vitesse(10, 0, 5))
+task_vitesse_phare = Task(lambda: vitesse(10, 0, 3))
 
 # Attente
 task_wait = Task(lambda : wait(2))
@@ -184,6 +184,7 @@ while t < Tmax:
 
     if t > T_Drapeau:
         task_lever_drapeau.start()
+
 
     t = time.time() - t0
 

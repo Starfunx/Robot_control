@@ -43,6 +43,7 @@ class RobotControl():
         self.consigne_vitesse_lineaire = []
         self.mesure_vitesse_roue_gauche = []
         self.mesure_vitesse_roue_droite = []
+        self.dist_obstacle = 90 + 80
 
         self.time = time.time()
 
@@ -94,7 +95,7 @@ class RobotControl():
         #         # Emergency
         #         break
 
-        if (liste_obstacle[0] < 500 or liste_obstacle[1] < 500):
+        if (liste_obstacle[0] < self.dist_obstacle or liste_obstacle[1] < self.dist_obstacle):
             # print("Obtacle detecté")
             self.consign_linear_speed = 0
             self.consign_angular_speed = 0
@@ -192,8 +193,6 @@ class RobotControl():
         self.robot.set_speed(self.consign_linear_speed, self.consign_angular_speed)
 
 
-
-
     def set_goal(self, pose : Pose2D):
         self.liste_goal = []
         self.goal = pose
@@ -216,6 +215,9 @@ class RobotControl():
         # print("X =", X, "\tY =", Y, "\tAtan =", angle_robot2goal )  
 
         return angle_robot2goal
+
+    def update_pos(self):
+        self.robotPose = self.robot.get_pose()
 
     def goal_reached(self):
         # critère dans un yaml
@@ -250,51 +252,3 @@ def constrainAngle(x):
         x += 2*np.pi
 
     return x - np.pi
-
-
-if __name__ == "__main__":
-    from module.tirette import Selection_zone
-
-    nom_fichier = './config/robot_config.yaml'
-    robot_port = "/dev/ttyACM0"
-    robot_baurate = 115200
-
-    carte_obstacle_port = ""
-    carte_obstacle_bauderate = 115200
-
-    robotcontrol = RobotControl(nom_fichier, robot_port, robot_baurate, carte_obstacle_port, carte_obstacle_bauderate)
-
-    # robotcontrol.robot.set_pose(0, 0, 0)
-    pose = [Pose2D(1000, 0, 0),
-            Pose2D(0, 0, 0)]
-    
-
-
-    robotcontrol.set_goal(pose[::-1])
-    
-    selection_zone = Selection_zone(14, 15)
-    # selection_zone.wait_start_loop()
-
-    print("Zone de départ :", selection_zone.zone)
-
-    robotcontrol.robot.enable_motors()
-    try:
-        while not(robotcontrol.goal_reached()):
-            # Mettre 10 Hz
-            robotcontrol.update_speed()
-
-            
-
-    except KeyboardInterrupt:
-        print("stop")
-        pass
-
-    # np.save("vitesse_angular", robotcontrol.consigne_vitesse_angulaire)
-    # np.save("vitesse_linear", robotcontrol.consigne_vitesse_lineaire)
-    # np.save("left_wheel", robotcontrol.mesure_vitesse_roue_gauche)
-    # np.save("right_wheel", robotcontrol.mesure_vitesse_roue_droite)
-
-    robotcontrol.robot.set_speed(0, 0)
-    robotcontrol.robot.disable_motors()
-    
-
