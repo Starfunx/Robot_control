@@ -81,9 +81,19 @@ def servo(valeur):
 
 
 def drapeau(valeur):
-    """ levée = -1 | Mid = 0 | bas = 1 """
+    """ levée = 1 \ -0.5 """
     global servo_drapeau
+    print("lever drapeau", valeur)
     servo_drapeau.value = valeur
+
+def vitesse(v_lin: float, v_ang:float, temps:float):
+    robotcontrol.robot.enable_motors()
+
+    t0 = time.time()
+    while time.time() < t0 + temps:
+        robotcontrol.robot.set_speed(v_lin, v_ang)
+
+    robotcontrol.robot.disable_motors()
 
 # def display_ecran():
 #     global ecran
@@ -96,10 +106,10 @@ def drapeau(valeur):
 # Creation des tasks
 ###
 # De déplacement
-task_deplacer_1000 = Task(lambda : go_to(Pose2D(1000, 0, 0)))
-task_deplacer_0 = Task(lambda: go_to(Pose2D(0, 0, 0)))
-task_stop_robot = Task(stop_robot)
-task_DeplacerAngle = Task(lambda: go_to_angle(np.pi/3))
+point_depart = Pose2D(250, 1310, np.pi/2)
+task_go_point_phare = Task(lambda: go_to(Pose2D(220, 1840)))
+task_tourner_vers_phare = Task(lambda: go_to_angle(np.pi/2))
+task_vitesse_phare = Task(lambda: vitesse(10, 0, 5))
 
 # Attente
 task_wait = Task(lambda : wait(2))
@@ -112,8 +122,8 @@ task_deploye_servo = Task(lambda : servo(1))
 task_retract_servo = Task(lambda : servo(-1))
 
 # Drapeau
-task_lever_drapeau = Task(lambda : drapeau(-1))
-task_baisser_drapeau = Task(lambda : drapeau(1))
+task_lever_drapeau = Task(lambda : drapeau(1))
+task_baisser_drapeau = Task(lambda : drapeau(-0.5))
 
 # task_affichage_ecran = Task(display_ecran)
 ############################################
@@ -130,9 +140,10 @@ carte_obstacle_port = "/dev/ttyUSB0"
 carte_obstacle_bauderate = 115200
 
 robotcontrol = RobotControl(nom_fichier, robot_port, robot_baurate, carte_obstacle_port, carte_obstacle_bauderate)
-robotcontrol.robot.set_pose(0, 0, 0)
+robotcontrol.robot.set_pose(point_depart.x, point_depart.y, point_depart.theta)
 # robotcontrol.robot.set_pid_left( 0.162, 0.024,  0.006)
 # robotcontrol.robot.set_pid_right(0.162, 0.024,  0.006)
+
 ###########################################
 # Creation des modules
 ###########################################
@@ -142,11 +153,9 @@ Device.pin_factory = RPiGPIOFactory()
 # Module servo sur le coté
 servo_cote = Servo_cote(27, 17)
 
-# Module pour le drapeau
-maxPW = (1.7+0.45)/1000      # terme de correction pour faire 180°
-minPW = (1.0-0.45)/1000      # terme de correction pour faire 180°
-servo_drapeau = Servo(22, min_pulse_width=minPW, max_pulse_width=maxPW)
-servo_drapeau.min()
+
+servo_drapeau = Servo(22)
+servo_drapeau.value = -0.5
 
 
 #########################################
@@ -156,45 +165,34 @@ selection_zone = Selection_zone(14, 15)
 # selection_zone.wait_start_loop()
 
 
-Tmax = 15.0 #secondes
-# start
 t0 = time.time()
-t = t0
+Tmax = 20 #secondes
+T_Drapeau = Tmax-5 #secondes
+# start
+t = 0
 
 # ecran = Ecran()
 # score = 0
 # Main loop
-while t < t0+Tmax:
-    # task_affichage_ecran.start()
-    # score +=1
+while t < Tmax:
+    # print(t)
 
-    task_deplacer_1000.start()
-
-    # if task_deplacer_1000.done:
-    #     task_wait.start() 
-
-    # if task_wait.done:
-    # task_DeplacerAngle.start() 
-    
-    # if task_DeplacerAngle.done:
-    #     task_deplacer_0.start() 
+    task_vitesse_phare.start()
 
 
-    t = time.time()
+
+
+    if t > T_Drapeau:
+        task_lever_drapeau.start()
+
+    t = time.time() - t0
 
 
 
 # End loop
+task_lever_drapeau.stop()
+task_vitesse_phare.stop()
 
-
-# task_affichage_ecran.stop()
-task_deplacer_1000.stop()
-task_deplacer_0.stop()
-task_deploye_servo.stop()
-task_retract_servo.stop()
-task_wait.stop()
-task_stop_robot.stop()
-task_DeplacerAngle.stop()
 
 for _ in range(150):
     stop_robot() 

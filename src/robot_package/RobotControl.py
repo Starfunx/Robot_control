@@ -95,7 +95,7 @@ class RobotControl():
         #         break
 
         if (liste_obstacle[0] < 500 or liste_obstacle[1] < 500):
-            print("Obtacle detecté")
+            # print("Obtacle detecté")
             self.consign_linear_speed = 0
             self.consign_angular_speed = 0
             self.robot.disable_motors()
