@@ -29,6 +29,7 @@ def go_to(goal: Pose2D):
 
     while not(robotcontrol.goal_reached()):
         robotcontrol.update_speed()
+        print(robotcontrol.robotPose)
     
     robotcontrol.robot.set_speed(0, 0)
     robotcontrol.robot.disable_motors()
@@ -42,10 +43,12 @@ def go_to_angle(angle: float):
     def mod(a, n):
         return (a%n+n)%n
 
-    Kalpha = 0.04
+    Kalpha = 0.05
+
+    tmax = time.time() + 10.0
 
     Beta = 10
-    while abs(Beta) >= 0.05:
+    while (abs(Beta) >= 0.05 ) and time.time() < tmax:
         pose = robotcontrol.robot.get_pose()
         theta = pose.theta
 
@@ -54,6 +57,7 @@ def go_to_angle(angle: float):
         Beta = mod(Beta + np.pi, 2*np.pi) - np.pi
         # print(Beta)
         ang_speed = -Kalpha * Beta
+        print(robotcontrol.robot.get_pose())
 
         robotcontrol.robot.set_speed(0.0, ang_speed)
 
@@ -87,14 +91,14 @@ def drapeau(valeur):
     servo_drapeau.value = valeur
 
 def vitesse(v_lin: float, v_ang:float, temps:float):
-    robotcontrol.robot.reset_board()
     time.sleep(0.5)
-    robotcontrol.set_pos()
     robotcontrol.robot.enable_motors()
+    robotcontrol.robotPose = robotcontrol.robot.get_pose() # update controller pos
 
     t0 = time.time()
     while time.time() < t0 + temps:
         robotcontrol.robot.set_speed(v_lin, v_ang)
+        print(robotcontrol.robot.get_pose())
 
     robotcontrol.robot.disable_motors()
 
@@ -104,27 +108,26 @@ def stop_and_wait(t):
 
 
 
+point_depart = Pose2D(0, 0, 0)
 point_depart = Pose2D(250, 1200, np.pi/2)
 ###
 # Creation des tasks
 #################################################################################
 # task_go_point_phare = Task(lambda: go_to(Pose2D(250, 1600)), "task_go_point_phare")
 # task_stop1 = Task(lambda: stop_and_wait(2))
-# task_orienter_phare = Task(lambda: go_to_angle(np.pi/2), "task_orienter_phare")
-task_vitesse_phare = Task(lambda: vitesse(150, 0.0, 3), "task_vitesse_phare")
-task_vitesseNeg_phare = Task(lambda: vitesse(-120, 0.0, 0.8), "task_vitesseNeg_phare")
+task_vitesse_phare = Task(lambda: vitesse(15, 0.0, 3), "task_vitesse_phare")
+task_vitesseNeg_phare = Task(lambda: vitesse(-12, 0.0, 0.8), "task_vitesseNeg_phare")
+task_orienter_phare = Task(lambda: go_to_angle(0.0), "task_orienter_phare")
 
-# task_orienter_point_inter = Task(lambda: go_to_angle(-np.pi/2+ np.pi), "task_orienter_point_inter")
-# task_point_intermediaire = Task(lambda: go_to(Pose2D(350, 500)), "task_point_intermediaire")
-# # orientation?
+task_orienter_point_inter = Task(lambda: go_to_angle(-np.pi/2), "task_orienter_point_inter")
 # task_point_MAH = Task(lambda: go_to(Pose2D(170, 170)), "task_point_MAH")
+
 # task_orienter_MAH = Task(lambda: go_to_angle(0), "task_orienter_MAH")
 # # Bras sur les côtés
-task_deploye_servo = Task(lambda : servo(1), "task_deploye_servo")
 
+# task_deploye_servo = Task(lambda : servo(1), "task_deploye_servo")
 # task_point_fin_MAH = Task(lambda: go_to(Pose2D(750, 170)), "task_point_fin_MAH")
 # task_retract_servo = Task(lambda : servo(-1), "task_retract_servo")
-
 
 
 # Drapeau
@@ -146,9 +149,15 @@ carte_obstacle_port = "/dev/ttyUSB0"
 carte_obstacle_bauderate = 115200
 
 robotcontrol = RobotControl(nom_fichier, robot_port, robot_baurate, carte_obstacle_port, carte_obstacle_bauderate)
-robotcontrol.robot.set_pose(point_depart.x, point_depart.y, point_depart.theta)
+robotcontrol.robot.reset_board()
+for _ in range (10):
+    robotcontrol.robot.set_pose(point_depart.x, point_depart.y, point_depart.theta)
 robotcontrol.robot.set_pid_left( 0.15, 0.024,  0.006)
 robotcontrol.robot.set_pid_right(0.15, 0.024,  0.006)
+print(robotcontrol.robot.get_pose())
+
+time.sleep(0.5)
+
 
 ###########################################
 # Creation des modules
@@ -177,35 +186,24 @@ Tmax = 100 #secondes
 T_Drapeau = Tmax-5 #secondes
 # start
 t = 0
-
 # ecran = Ecran()
+
+tmp_task = Task(lambda: go_to(Pose2D(1000,0)))
+tmp_task = Task(lambda: go_to(Pose2D(1000,0)))
 # score = 0
 # Main loop
 while t < Tmax:
 
-    # task_deploye_servo.start()
-    # if task_deploye_servo.done:
-    # task_go_point_phare.start()
+    # tmp_task.start()
 
-    # if task_go_point_phare.done:
-    #     task_stop1.start()
-
-    # if task_stop1.done:
-    #     task_orienter_phare.start()
-
-    # if task_orienter_phare.done:
     task_vitesse_phare.start()
 
     if task_vitesse_phare.done:
         task_vitesseNeg_phare.start()
-
-    # if task_vitesseNeg_phare.done:
-    #     task_orienter_point_inter.start()
+    if task_vitesseNeg_phare.done:
+        task_orienter_point_inter.start()
 
     # if task_orienter_point_inter.done:
-    #     task_point_intermediaire.start()
-
-    # if task_point_intermediaire.done:
     #     task_point_MAH.start()
 
     # if task_point_MAH.done:
@@ -230,8 +228,8 @@ while t < Tmax:
 
 task_vitesse_phare.stop()
 task_vitesseNeg_phare.stop()
-
-
+task_orienter_point_inter.stop()
+# task_point_MAH
 
 for _ in range(150):
     stop_robot() 

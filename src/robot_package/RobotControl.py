@@ -43,11 +43,8 @@ class RobotControl():
         self.consigne_vitesse_lineaire = []
         self.mesure_vitesse_roue_gauche = []
         self.mesure_vitesse_roue_droite = []
-        self.dist_obstacle = 300
+        self.dist_obstacle = 500
 
-        self.time = time.time()
-
-        
 
     def update_speed(self):
         # lecture
@@ -63,8 +60,8 @@ class RobotControl():
 
 
         # Constantes
-        krho = 0.2
-        kalpha = 1
+        krho = 0.015
+        kalpha = 0.07
         flag_obstacle_droite = 0
         flag_obstacle_gauche = 0
 
@@ -101,6 +98,7 @@ class RobotControl():
             self.consign_linear_speed = 0
             self.consign_angular_speed = 0
             self.robot.disable_motors()
+            print("obstacle detecté")
 
 
 
@@ -129,19 +127,21 @@ class RobotControl():
             # Calculs si il n'y a aucun obstacle
             self.robot.enable_motors()
             dist_robot2goal = self.distance_robot2goal(self.goal)
-            angle_robot2goal = self.angle_robot2goal(self.goal)
-            angle_goal = self.goal.theta - self.robotPose.theta
+            alpha = self.angle_robot2goal(self.goal) # alpha
             # angle_robot2goal -= angle_goal
     
             # Dist_sensir(obstacle) -> repère robot
             ############################
             # Stratégie en fonction des données
             # Calcul vitesse, vitesse angulaire pour aller au point B
-            dt = (time.time() - self.time)
+            # if abs(alpha) > 1.0:
+            #     self.consign_linear_speed = 0
+            #     self.consign_angular_speed = kalpha * alpha
+            # else:
+            self.consign_linear_speed = krho * dist_robot2goal * np.cos(alpha)
+            # self.consign_linear_speed = 0.0
             
-            self.consign_linear_speed = krho * dist_robot2goal / dt
-            self.consign_angular_speed = kalpha * constrainAngle(angle_robot2goal) / dt
-        
+            self.consign_angular_speed = -kalpha * alpha
         
         ############################
         # update la vitesse avec le driver
@@ -157,7 +157,6 @@ class RobotControl():
         #
         # print(self.consign_linear_speed, self.consign_angular_speed)
         self.robot.set_speed(self.consign_linear_speed, self.consign_angular_speed)
-        self.time = time.time()
 
 
         # ############################
@@ -212,13 +211,14 @@ class RobotControl():
         X = goal.x - self.robotPose.x
         Y = goal.y - self.robotPose.y
         
-        angle_robot2goal = constrainAngle( np.arctan2(Y, X) - self.robotPose.theta )
-        # print("X =", X, "\tY =", Y, "\tAtan =", angle_robot2goal )  
+        tmp_angle = np.arctan2(Y, X) - self.robotPose.theta
+        alpha = constrainAngle( tmp_angle )
 
-        return angle_robot2goal
+        print(alpha)
+        print(alpha)
+        print(alpha)
 
-    def update_pos(self):
-        self.robotPose = self.robot.get_pose()
+        return alpha
 
     def goal_reached(self):
         # critère dans un yaml
@@ -228,7 +228,7 @@ class RobotControl():
         distance = self.distance_robot2goal(self.goal)
         # print(distance)
 
-        if ( (distance < 100) ):
+        if ( (distance < 50) ):
             if ( len(self.liste_goal) > 0 ):
                 print(distance)
                 print("goal", self.goal.x, "; ", self.goal.y)
